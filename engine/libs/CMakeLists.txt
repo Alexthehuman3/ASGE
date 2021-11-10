@@ -7,6 +7,7 @@ option(GLFW_BUILD_EXAMPLES OFF)
 option(GLFW_BUILD_TESTS OFF)
 
 # GLFW Build
+
 add_subdirectory(glfw)
 if(GLFW_SHARED_LIB)
     target_compile_definitions(glfw PRIVATE BUILD_SHARED_LIBS=TRUE)
