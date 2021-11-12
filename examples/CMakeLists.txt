@@ -1,2 +1,2 @@
 add_executable(asgegame helloasge/ASGEGame.cpp)
-target_link_libraries(asgegame PRIVATE asge)
+target_link_libraries(asgegame PRIVATE asge tmxlite)

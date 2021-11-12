@@ -2,6 +2,7 @@
 #include <Engine/Logger.hpp>
 #include <Engine/OGLGame.hpp>
 #include <Engine/Sprite.hpp>
+#include <tmxlite/Map.hpp>
 
 class ASGENetGame : public ASGE::OGLGame
 {
