@@ -11,20 +11,8 @@ class ASGENetGame : public ASGE::OGLGame
   {
     inputs->use_threads = false;
     inputs->addCallbackFnc(ASGE::EventType::E_KEY, &ASGENetGame::keyHandler, this);
-    bg = renderer->createUniqueSprite();
-    bg->loadTexture("/data/FHD.png");
-    bg->xPos(-512*0.25F);
 
-    robot = renderer->createUniqueSprite();
-    robot->loadTexture("/data/character_zombie_idle.png");
-    robot->xPos((robot->width() * 0.5F));
-    robot->yPos(768/2.0F - (robot->height() * 0.5F));
-
-    zombie = renderer->createUniqueSprite();
-    zombie->loadTexture("/data/character_zombie_idle.png");
-    zombie->xPos(1024/2.0F - (zombie->width() * 0.5F));
-    zombie->yPos(768/2.0F - (zombie->height() * 0.5F));
-
+    renderer->setClearColour(ASGE::COLOURS::BLACK);
     lh_camera.resize(1024 / 2.0F, 768);
     rh_camera.resize(1024 / 2.0F, 768);
     lh_camera.lookAt({1024 * 0.25F, 768 / 2.0F});
@@ -80,47 +68,39 @@ class ASGENetGame : public ASGE::OGLGame
     }
     if(keys[ASGE::KEYS::KEY_A])
     {
-      robot->xPos(robot->xPos() -5);
       // rh_camera.translateX(-5);
     }
     if(keys[ASGE::KEYS::KEY_D])
     {
-      robot->xPos(robot->xPos() +5);
       // rh_camera.translateX(+5);
     }
     if(keys[ASGE::KEYS::KEY_W])
     {
-      robot->yPos(robot->yPos() -5);
       // rh_camera.translateX(+5);
     }
     if(keys[ASGE::KEYS::KEY_S])
     {
-      robot->yPos(robot->yPos() +5);
       // rh_camera.translateX(+5);
     }
 
     if(keys[ASGE::KEYS::KEY_LEFT])
     {
-      zombie->xPos(zombie->xPos() -5);
       // rh_camera.translateX(-5);
     }
     if(keys[ASGE::KEYS::KEY_RIGHT])
     {
-      zombie->xPos(zombie->xPos() +5);
       // rh_camera.translateX(+5);
     }
     if(keys[ASGE::KEYS::KEY_UP])
     {
-      zombie->yPos(zombie->yPos() -5);
       // rh_camera.translateX(+5);
     }
     if(keys[ASGE::KEYS::KEY_DOWN])
     {
-      zombie->yPos(zombie->yPos() +5);
       // rh_camera.translateX(+5);
     }
 
-
+/*
     lh_camera.lookAt(
       {
         robot->xPos() + robot->width()  * 0.5F,
@@ -130,7 +110,7 @@ class ASGENetGame : public ASGE::OGLGame
       {
         zombie->xPos() + zombie->width()  * 0.5F,
         zombie->yPos() + zombie->height() * 0.5F });
-
+*/
     lh_camera.update(us);
     rh_camera.update(us);
   };
@@ -139,16 +119,20 @@ class ASGENetGame : public ASGE::OGLGame
   {
     renderer->setViewport({0, 0, 1024/2, 768});
     renderer->setProjectionMatrix(lh_camera.getView());
+    /*
     renderer->render(*bg);
     renderer->render(*robot);
     renderer->render(*zombie);
+     */
 
     auto view = rh_camera.getView();
     renderer->setViewport({1024/2, 0, 1024/2, 768});
     renderer->setProjectionMatrix(view);
+    /*
     renderer->render(*bg);
     renderer->render(*robot);
     renderer->render(*zombie);
+     */
 
     ASGE::Text camera1 = ASGE::Text{ renderer->getDefaultFont(), "CAMERA1" };
     camera1.setPositionX(1024 * 0.25F - (camera1.getWidth() * 0.5F));
@@ -166,9 +150,6 @@ class ASGENetGame : public ASGE::OGLGame
 
  private:
   int key_callback_id = -1; /**< Key Input Callback ID. */
-  std::unique_ptr<ASGE::Sprite> bg = nullptr;
-  std::unique_ptr<ASGE::Sprite> zombie = nullptr;
-  std::unique_ptr<ASGE::Sprite> robot = nullptr;
   ASGE::Camera lh_camera{};
   ASGE::Camera rh_camera{};
 };
