@@ -3,7 +3,7 @@
 #include <Engine/Logger.hpp>
 #include <Engine/OGLGame.hpp>
 #include <Engine/Sprite.hpp>
-#include <tmxlite/Map.hpp>
+#include "headers/MapLoader.hpp"
 
 class ASGENetGame : public ASGE::OGLGame
 {
@@ -12,7 +12,7 @@ class ASGENetGame : public ASGE::OGLGame
     OGLGame(settings)
   {
     inputs->use_threads = false;
-    inputs->addCallbackFnc(ASGE::EventType::E_KEY, &ASGENetGame::keyHandler, this);
+    std::string id = inputs->addCallbackFnc(ASGE::EventType::E_KEY, &ASGENetGame::keyHandler, this);
     init(settings);
   }
 
@@ -125,9 +125,13 @@ class ASGENetGame : public ASGE::OGLGame
   {
     renderer->setViewport({0, 0, 1024, 768});
     renderer->setProjectionMatrix(lh_camera.getView());
-    renderer->render(*bg);
+//    renderer->render(*bg);
     renderer->render(*robot);
     renderer->render(*zombie);
+    for (auto& lvl1_tile : Level1Tiles)
+    {
+      renderer->render(*lvl1_tile); //currently only rendered in the same space
+    }
 /*
     auto view = rh_camera.getView();
     renderer->setViewport({1024/2, 0, 1024/2, 768});
@@ -158,7 +162,7 @@ class ASGENetGame : public ASGE::OGLGame
 
     zombie = renderer->createUniqueSprite();
     zombie->loadTexture("/data/images/character_zombie_idle.png");
-    zombie->xPos(settings.window_width/2);
+    zombie->xPos(settings.window_width / 2);
     robot->setGlobalZOrder(1);
 
     bg = renderer->createUniqueSprite();
@@ -167,8 +171,40 @@ class ASGENetGame : public ASGE::OGLGame
     renderer->setClearColour(ASGE::COLOURS::BLACK);
     lh_camera.resize(settings.window_width, settings.window_height);
     rh_camera.resize(1024 / 2.0F, 768);
-    lh_camera.lookAt({1024 * 0.25F, 768 / 2.0F});
-    rh_camera.lookAt({1024 * 0.50F, 768 / 2.0F});
+    lh_camera.lookAt({ 1024 * 0.25F, 768 / 2.0F });
+    rh_camera.lookAt({ 1024 * 0.50F, 768 / 2.0F });
+
+    if (!level.loadSharedMap("data/tilemap/testTile.tmx"))
+    {
+      Logging::ERRORS("Tilemap cannot be loaded");
+    }
+    level.init();
+    float x_pos = 0;
+    float y_pos = 0;
+    for (auto& tile : level.getLoadedTiles())
+    {
+      auto& sprite = Level1Tiles.emplace_back(renderer->createUniqueSprite());
+      if (sprite->loadTexture(tile.imagePath))
+      {
+        sprite->srcRect()[0] = static_cast<float>(tile.imagePosition.x);
+        sprite->srcRect()[1] = static_cast<float>(tile.imagePosition.y);
+        sprite->srcRect()[2] = static_cast<float>(tile.imageSize.x);
+        sprite->srcRect()[3] = static_cast<float>(tile.imageSize.y);
+
+        sprite->width(static_cast<float>(tile.imageSize.x));
+        sprite->height(static_cast<float>(tile.imageSize.y));
+
+        sprite->scale(3);
+        sprite->setMagFilter(ASGE::Texture2D::MagFilter::NEAREST);
+
+        sprite->yPos(static_cast<float>(y_pos+static_cast<float>(tile.imagePosition.y)));
+        sprite->xPos(static_cast<float>(x_pos+static_cast<float>(tile.imagePosition.x)));
+      }
+      else
+      {
+        Logging::ERRORS("Loading Tile Texture failed");
+      }
+    }
   }
  private:
   int key_callback_id = -1; /**< Key Input Callback ID. */
@@ -177,6 +213,8 @@ class ASGENetGame : public ASGE::OGLGame
   std::unique_ptr<ASGE::Sprite> bg = nullptr;
   ASGE::Camera lh_camera{};
   ASGE::Camera rh_camera{};
+  MapLoader level;
+  std::vector<std::unique_ptr<ASGE::Sprite>> Level1Tiles;
 };
 
 int main(int /*argc*/, char* /*argv*/[])
