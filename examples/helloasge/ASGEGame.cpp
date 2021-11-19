@@ -1,3 +1,4 @@
+#include <map>
 #include <Engine/GameSettings.hpp>
 #include <Engine/Logger.hpp>
 #include <Engine/OGLGame.hpp>
@@ -12,7 +13,6 @@ class ASGENetGame : public ASGE::OGLGame
   {
     inputs->use_threads = false;
     inputs->addCallbackFnc(ASGE::EventType::E_KEY, &ASGENetGame::keyHandler, this);
-
     init(settings);
   }
 

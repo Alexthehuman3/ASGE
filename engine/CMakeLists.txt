@@ -2,9 +2,9 @@ cmake_minimum_required(VERSION 3.9.0)
 set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15" CACHE STRING "Minimum OS X deployment version")
 project(asge)
 string(TIMESTAMP date "%Y%m%d")
-set(ASGE_VERSION_MAJOR "2")
+set(ASGE_VERSION_MAJOR "3")
 set(ASGE_VERSION_MINOR "1")
-set(ASGE_VERSION_PATCH "0")
+set(ASGE_VERSION_PATCH "1")
 set(ASGE_VERSION_EXTRA "${date}")
 set(ASGE_VERSION "${ASGE_VERSION_MAJOR}.${ASGE_VERSION_MINOR}")
 set(ASGE_VERSION_FULL "${ASGE_VERSION}.${ASGE_VERSION_PATCH}${ASGE_VERSION_EXTRA}")
@@ -13,7 +13,7 @@ set(ASGE_VERSION_FULL "${ASGE_VERSION}.${ASGE_VERSION_PATCH}${ASGE_VERSION_EXTRA
 set(CMAKE_DEBUG_POSTFIX d)
 
 # Setup the libs that the game engine are reliant on
-list(APPEND LINK_LIBS "magic_enum::magic_enum")
+list(APPEND LINK_LIBS "magic_enum::magic_enum" "stduuid::stduuid")
 add_subdirectory(libs)
 
 set( PROJECT_HEADERS
@@ -153,7 +153,7 @@ write_basic_package_version_file(
 )
 
 # Compiler requirements for this library,
-target_compile_features( ${PROJECT_NAME} PUBLIC cxx_std_17 )
+target_compile_features( ${PROJECT_NAME} PUBLIC cxx_std_20 )
 
 # Compilation settings
 target_compile_options(
