@@ -4,6 +4,53 @@ namespace ASGE {
 
 @tableofcontents
 
+@section changelog-311 v3.1.1
+Released 18/11/2021
+
+@subsection changelog-311-changes Enhancements
+- Monolithic builds now disable shared by default [[81a7ce9]](https://github.com/HuxyUK/ASGE/commit/27d30f32eecf5b5fcb355bdfdd24f305c6ac0790)
+- Enable C++20 support for Engine builds [[6177e74]](https://github.com/HuxyUK/ASGE/commit/6177e74989963bfe3da554f94d8b76c79cd1d331)
+- Remove dependency that was added in error [[fed6275]](https://github.com/HuxyUK/ASGE/commit/fed6275eb8a4a0d561d0a00df9c58f7f03cae272)
+
+---
+
+@section changelog-310 v3.1.0
+Released 17/11/2021
+
+@subsection changelog-310-changes Enhancements
+- 2nd fix for bounds calculation on fonts [[81a7ce9]](https://github.com/HuxyUK/ASGE/commit/18f744f2cf2d6888de041e38723194a2587cdccd)
+- Enable mipmaps for font atlases [[5d5adb]](https://github.com/HuxyUK/ASGE/commit/5d5adbe2ae253ecac83b26432d750e47297f547c)
+- Add new function for calculation max deviation in the Y axis for font rendering `boundsY`
+
+---
+
+@section changelog-300 v3.0.0
+Released 16/11/2021
+
+@subsection changelog-300-changes Enhancements
+- Fix for long-standing input bug [[053d425]](https://github.com/HuxyUK/ASGE/commit/053d425cfe2998483264bb5a0bc2565b5c32664e)
+- Fix issue with bounds calculation for fonts [[ab418f7]](https://github.com/HuxyUK/ASGE/commit/ab418f7cfe394c3ae49b03394818be399a841107)
+
+@subsection changelog-300-changes-misc Misc
+- Added stduuid library [[06c4b93]](https://github.com/HuxyUK/ASGE/commit/06c4b93bdc894e8e9dec4a51388461d8b9b2319d)
+
+---
+
+@section changelog-220 v2.2.0
+Released 15/11/2021
+
+@subsection changelog-220-changes Enhancements
+- Support for MSAA rendering [[1a67df7]](https://github.com/HuxyUK/ASGE/commit/1a67df7b393fc27bc465fd60a4fa5573ec18c01a)
+- Support for MSAA frame buffers [[211783c]](https://github.com/HuxyUK/ASGE/commit/211783c6d54252ea3507852c520f77f9156ec724)
+
+@subsection changelog-220-bugs Bug Fixes
+- Swap correct UV coordinates when x-axis flipped [[9f92a9c]](https://github.com/HuxyUK/ASGE/commit/9f92a9ca8e85abeaeaa152cae416683930027a93)
+
+@subsection changelog-220-changes-misc Misc
+- Don't clamp sub-pixel positions [[e6621d6]](https://github.com/HuxyUK/ASGE/commit/e6621d6e32f80e052b091dba54a667b93b299fb4)
+
+---
+
 @section changelog-210 v2.1.0
 Released 07/11/2021
 
