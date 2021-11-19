@@ -13,23 +13,7 @@ class ASGENetGame : public ASGE::OGLGame
     inputs->use_threads = false;
     inputs->addCallbackFnc(ASGE::EventType::E_KEY, &ASGENetGame::keyHandler, this);
 
-    robot = renderer->createUniqueSprite();
-    robot->loadTexture("/data/images/character_robot_idle.png");
-    robot->setGlobalZOrder(1);
-
-    zombie = renderer->createUniqueSprite();
-    zombie->loadTexture("/data/images/character_zombie_idle.png");
-    zombie->xPos(settings.window_width/2);
-    robot->setGlobalZOrder(1);
-
-    bg = renderer->createUniqueSprite();
-    bg->loadTexture("/data/images/FHD.png");
-    bg->setGlobalZOrder(-1);
-    renderer->setClearColour(ASGE::COLOURS::BLACK);
-    lh_camera.resize(settings.window_width, settings.window_height);
-    rh_camera.resize(1024 / 2.0F, 768);
-    lh_camera.lookAt({1024 * 0.25F, 768 / 2.0F});
-    rh_camera.lookAt({1024 * 0.50F, 768 / 2.0F});
+    init(settings);
   }
 
   ~ASGENetGame() override = default;
@@ -144,18 +128,14 @@ class ASGENetGame : public ASGE::OGLGame
     renderer->render(*bg);
     renderer->render(*robot);
     renderer->render(*zombie);
-
 /*
     auto view = rh_camera.getView();
     renderer->setViewport({1024/2, 0, 1024/2, 768});
     renderer->setProjectionMatrix(view);
-
     renderer->render(*bg);
     renderer->render(*robot);
     renderer->render(*zombie);
     */
-
-
     ASGE::Text camera1 = ASGE::Text{ renderer->getDefaultFont(), "CAMERA1" };
     camera1.setPositionX(1024 * 0.25F - (camera1.getWidth() * 0.5F));
     camera1.setPositionY(30);
@@ -170,6 +150,26 @@ class ASGENetGame : public ASGE::OGLGame
     renderer->render(camera2);
   };
 
+  void init(const ASGE::GameSettings& settings)
+  {
+    robot = renderer->createUniqueSprite();
+    robot->loadTexture("/data/images/character_robot_idle.png");
+    robot->setGlobalZOrder(1);
+
+    zombie = renderer->createUniqueSprite();
+    zombie->loadTexture("/data/images/character_zombie_idle.png");
+    zombie->xPos(settings.window_width/2);
+    robot->setGlobalZOrder(1);
+
+    bg = renderer->createUniqueSprite();
+    bg->loadTexture("/data/images/FHD.png");
+    bg->setGlobalZOrder(-1);
+    renderer->setClearColour(ASGE::COLOURS::BLACK);
+    lh_camera.resize(settings.window_width, settings.window_height);
+    rh_camera.resize(1024 / 2.0F, 768);
+    lh_camera.lookAt({1024 * 0.25F, 768 / 2.0F});
+    rh_camera.lookAt({1024 * 0.50F, 768 / 2.0F});
+  }
  private:
   int key_callback_id = -1; /**< Key Input Callback ID. */
   std::unique_ptr<ASGE::Sprite> robot = nullptr;
