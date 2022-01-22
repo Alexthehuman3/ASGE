@@ -179,8 +179,9 @@ class ASGENetGame : public ASGE::OGLGame
       Logging::ERRORS("Tilemap cannot be loaded");
     }
     level.init();
-    float x_pos = 0;
-    float y_pos = 0;
+    int x_limit = level.getMap()->getTileCount().x;
+    int x_iter = 0;
+    int y_iter = 0;
     for (auto& tile : level.getLoadedTiles())
     {
       auto& sprite = Level1Tiles.emplace_back(renderer->createUniqueSprite());
@@ -194,11 +195,17 @@ class ASGENetGame : public ASGE::OGLGame
         sprite->width(static_cast<float>(tile.imageSize.x));
         sprite->height(static_cast<float>(tile.imageSize.y));
 
-        sprite->scale(3);
+        sprite->scale(SCALE);
         sprite->setMagFilter(ASGE::Texture2D::MagFilter::NEAREST);
 
-        sprite->yPos(static_cast<float>(y_pos+static_cast<float>(tile.imagePosition.y)));
-        sprite->xPos(static_cast<float>(x_pos+static_cast<float>(tile.imagePosition.x)));
+        sprite->yPos(static_cast<float>(tile.imageSize.y*SCALE*y_iter));
+        sprite->xPos(static_cast<float>(tile.imageSize.x*SCALE*x_iter));
+        x_iter++;
+        if (x_iter > x_limit)
+        {
+          x_iter = 0;
+          y_iter++;
+        }
       }
       else
       {
@@ -215,6 +222,8 @@ class ASGENetGame : public ASGE::OGLGame
   ASGE::Camera rh_camera{};
   MapLoader level;
   std::vector<std::unique_ptr<ASGE::Sprite>> Level1Tiles;
+
+  const int SCALE = 3;
 };
 
 int main(int /*argc*/, char* /*argv*/[])
