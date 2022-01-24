@@ -1,0 +1,2 @@
+baseMapRules.tmx
+D:\UWE\CCTP\ASGE-DynamicTileLoader\examples\data\tilemap\baseMapRules.txt

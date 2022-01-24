@@ -52,7 +52,7 @@ class ASGENetGame : public ASGE::OGLGame
 
   void update(const ASGE::GameTime& us) override
   {
-
+    double time_delta = us.deltaInSecs()*100;
     if (auto gamepad_data = inputs->getGamePad(0); gamepad_data.is_connected)
     {
       for( int i=0; i<gamepad_data.no_of_buttons; ++i)
@@ -63,48 +63,56 @@ class ASGENetGame : public ASGE::OGLGame
         }
       }
     }
+
+    float oldxPos = robot->xPos();
+    float oldyPos = robot->yPos();
     if(keys[ASGE::KEYS::KEY_A])
     {
-      robot->xPos(robot->xPos() -5);
+      robot->xPos(robot->xPos() -MOVESPEED*time_delta);
       // rh_camera.translateX(-5);
     }
     if(keys[ASGE::KEYS::KEY_D])
     {
-      robot->xPos(robot->xPos() +5);
+      robot->xPos(robot->xPos() +MOVESPEED*time_delta);
       // rh_camera.translateX(+5);
     }
     if(keys[ASGE::KEYS::KEY_W])
     {
-      robot->yPos(robot->yPos() -5);
+      robot->yPos(robot->yPos() -MOVESPEED*time_delta);
       // rh_camera.translateX(+5);
     }
     if(keys[ASGE::KEYS::KEY_S])
     {
-      robot->yPos(robot->yPos() +5);
+      robot->yPos(robot->yPos() +MOVESPEED*time_delta);
       // rh_camera.translateX(+5);
     }
 
     if(keys[ASGE::KEYS::KEY_LEFT])
     {
-      zombie->xPos(zombie->xPos() -5);
+      zombie->xPos(zombie->xPos() -MOVESPEED*time_delta);
       // rh_camera.translateX(-5);
     }
     if(keys[ASGE::KEYS::KEY_RIGHT])
     {
-      zombie->xPos(zombie->xPos() +5);
+      zombie->xPos(zombie->xPos() +MOVESPEED*time_delta);
       // rh_camera.translateX(+5);
     }
     if(keys[ASGE::KEYS::KEY_UP])
     {
-      zombie->yPos(zombie->yPos() -5);
+      zombie->yPos(zombie->yPos() -MOVESPEED*time_delta);
       // rh_camera.translateX(+5);
     }
     if(keys[ASGE::KEYS::KEY_DOWN])
     {
-      zombie->yPos(zombie->yPos() +5);
+      zombie->yPos(zombie->yPos() +MOVESPEED*time_delta);
       // rh_camera.translateX(+5);
     }
-
+    if (level.AABBCollision(robot->getWorldBounds(),{robot->xPos(),robot->yPos()}))
+    {
+      Logging::INFO("Colliding! Returning to old position!");
+      robot->xPos(robot->xPos()+(oldxPos-robot->xPos()));
+      robot->yPos(robot->yPos()+(oldyPos-robot->yPos()));
+    }
 
     lh_camera.lookAt(
       {
@@ -128,10 +136,7 @@ class ASGENetGame : public ASGE::OGLGame
 //    renderer->render(*bg);
     renderer->render(*robot);
     renderer->render(*zombie);
-    for (auto& lvl1_tile : Level1Tiles)
-    {
-      renderer->render(*lvl1_tile); //currently only rendered in the same space
-    }
+    level.render(renderer.get());
 /*
     auto view = rh_camera.getView();
     renderer->setViewport({1024/2, 0, 1024/2, 768});
@@ -158,6 +163,8 @@ class ASGENetGame : public ASGE::OGLGame
   {
     robot = renderer->createUniqueSprite();
     robot->loadTexture("/data/images/character_robot_idle.png");
+    robot->width(16*7.5);
+    robot->height(16*10);
     robot->setGlobalZOrder(1);
 
     zombie = renderer->createUniqueSprite();
@@ -178,50 +185,29 @@ class ASGENetGame : public ASGE::OGLGame
     {
       Logging::ERRORS("Tilemap cannot be loaded");
     }
-    level.init();
-    int x_limit = level.getMap()->getTileCount().x;
-    int x_iter = 0;
-    int y_iter = 0;
-    for (auto& tile : level.getLoadedTiles())
-    {
-      auto& sprite = Level1Tiles.emplace_back(renderer->createUniqueSprite());
-      if (sprite->loadTexture(tile.imagePath))
-      {
-        sprite->srcRect()[0] = static_cast<float>(tile.imagePosition.x);
-        sprite->srcRect()[1] = static_cast<float>(tile.imagePosition.y);
-        sprite->srcRect()[2] = static_cast<float>(tile.imageSize.x);
-        sprite->srcRect()[3] = static_cast<float>(tile.imageSize.y);
+    level.init(renderer.get());
 
-        sprite->width(static_cast<float>(tile.imageSize.x));
-        sprite->height(static_cast<float>(tile.imageSize.y));
+    robot->xPos(level.getTileByLayerID(3).x);
+    robot->yPos(level.getTileByLayerID(3).y);
+  }
 
-        sprite->scale(SCALE);
-        sprite->setMagFilter(ASGE::Texture2D::MagFilter::NEAREST);
-
-        sprite->yPos(static_cast<float>(tile.imageSize.y*SCALE*y_iter));
-        sprite->xPos(static_cast<float>(tile.imageSize.x*SCALE*x_iter));
-        x_iter++;
-        if (x_iter > x_limit)
-        {
-          x_iter = 0;
-          y_iter++;
-        }
-      }
-      else
-      {
-        Logging::ERRORS("Loading Tile Texture failed");
-      }
-    }
+  bool AABBCollision(std::shared_ptr<ASGE::Sprite> target1, std::shared_ptr<ASGE::Sprite> target2)
+  {
+    auto bound1 = target1->getWorldBounds();
+    auto bound2 = target2->getWorldBounds();
+    return (bound1.v1.x <= bound2.v2.x || bound1.v1.y <= bound2.v3.y ||
+            bound1.v2.x >= bound2.v1.x || bound1.v3.y >= bound2.v1.y);
   }
  private:
   int key_callback_id = -1; /**< Key Input Callback ID. */
-  std::unique_ptr<ASGE::Sprite> robot = nullptr;
+  std::shared_ptr<ASGE::Sprite> robot = nullptr;
   std::unique_ptr<ASGE::Sprite> zombie = nullptr;
   std::unique_ptr<ASGE::Sprite> bg = nullptr;
   ASGE::Camera lh_camera{};
   ASGE::Camera rh_camera{};
   MapLoader level;
-  std::vector<std::unique_ptr<ASGE::Sprite>> Level1Tiles;
+  ASGE::Point2D player_direction = {0,0};
+  const float MOVESPEED = 2;
 
   const int SCALE = 3;
 };
