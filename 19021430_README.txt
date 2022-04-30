@@ -1,0 +1,22 @@
+Dissertation Submission README
+
+To install:
+- Clone the repo, checkout to either main (3.1.1 Engine) or test_pull (3.2.0 Engine)
+- Open the entire folder in an IDE of your choice
+- It should run if you have Clang (LLVM) 12.
+
+To use:
+- Open the testTile.tmx in example/data/tilemap (view bottom if you want to make your own edits)
+- Change the tmx_path variable in example/helloasge/ASGEGame.cpp to the directory of the testTile.tmx.
+	- An easy way to do this is locate the tmx file in the explorer in the IDE, right click the file and copy path or equivalent.
+- Run game, WASD to move, E to break barrels and open chests
+- CTRL + S saves the map in testTile.tmx
+- Game should replace the tiles.
+
+- example/data/tilemap contains the RULES and a base TileMAP (needs to be in same folder to function)
+	- It can be used by tiled for auto map generation.
+	- Ctrl-Z if you don't like the generation, takes you back to a blank state
+	- Ctrl-M to generate a map
+	
+- example/data/tileset contains TileSET for the TileMAP
+
