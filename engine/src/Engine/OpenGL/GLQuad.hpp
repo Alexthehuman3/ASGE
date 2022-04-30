@@ -69,6 +69,7 @@ namespace ASGE
   //      glm::vec4{ 1.0f, 0.0f, padding_t}, glm::vec4{ 1.0f, 0.0f, padding_t },
   //      glm::vec4{ 1.0f, 1.0f, padding_t}, glm::vec4{ 0.0f, 1.0f, padding_t } };
 
+  class RenderState;
   struct RenderQuad
   {
     RenderQuad() = default;
@@ -82,6 +83,8 @@ namespace ASGE
     GLuint  shader_id  = 0;
     GLuint  texture_id = 0;
     GLshort z_order    = 0;
+    GLfloat distance   = 0;
+    RenderState* state = nullptr;
   };
 
   enum BufferState : unsigned int

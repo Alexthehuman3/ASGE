@@ -18,8 +18,8 @@
 
 #pragma once
 #include "Texture.hpp"
-#include <Engine/Colours.hpp>
-#include <Engine/SpriteBounds.hpp>
+#include "Colours.hpp"
+#include "SpriteBounds.hpp"
 #include <memory>
 #include <string>
 
@@ -56,6 +56,7 @@ namespace ASGE
       NORMAL    = 0x00,           /**< texture is not flipped. */
       FLIP_X    = 0x01,           /**< texture is flipped on the x axis. */
       FLIP_Y    = 0x02,           /**< texture is flipped on the y axis. */
+      FLIP_XY   = 0x04,           /**< texture is flipped diagonally. */
       FLIP_BOTH = FLIP_X | FLIP_Y /**< texture is flipped on both axis.  */
     };
 
@@ -76,6 +77,36 @@ namespace ASGE
     };
 
     /**
+     * @brief Flags to control attachments of textures.
+     * When attaching a texture to the sprite, by default the sprite's
+     * settings will be reset to match the newly attached texture. These
+     * flags allow the user to prevent certain resets from occurs.
+     */
+    enum class AttachMode : int8_t
+    {
+      DEFAULT   = 0x00,      /**< By default, clobber the existing sprite's settings. */
+      KEEP_DIMS = 0x01,      /**< Retain the sprite's dimensions. */
+      KEEP_UVS  = 0x02,      /**< Retain the sprite's UV settings. */
+      KEEP_TINT = 0x04,      /**< Retain the sprite's tint. */
+      KEEP_ROTATION = 0x08,  /**< Retain the sprite's rotation. */
+      GENERATE_MIPS = 0x10,  /**< Generate a new set of MipMaps for the texture. */
+    };
+
+    friend AttachMode operator|(AttachMode lhs, AttachMode rhs) {
+      return static_cast<AttachMode>(
+          static_cast<std::underlying_type<AttachMode>::type>(lhs) |
+          static_cast<std::underlying_type<AttachMode>::type>(rhs)
+      );
+    }
+
+    friend AttachMode operator&(AttachMode lhs, AttachMode rhs) {
+      return static_cast<AttachMode>(
+          static_cast<std::underlying_type<AttachMode>::type>(lhs) &
+          static_cast<std::underlying_type<AttachMode>::type>(rhs)
+      );
+    }
+
+    /**
      * @brief Default destructor.
      *
      * The destructor does not free the memory used on the GPU.
@@ -90,7 +121,14 @@ namespace ASGE
      *
      * * @return The result of the load operation.
      */
-    virtual bool loadTexture(const std::string&) = 0;
+    virtual bool loadTexture(const std::string&, AttachMode mode) = 0;
+
+    /**
+     * @brief
+     * @return The result of the load operation.
+     */
+    bool loadTexture(const std::string&);
+
 
     /**
      * @brief Pure virtual function for retrieving the loaded texture.
@@ -303,6 +341,12 @@ namespace ASGE
     [[nodiscard]] bool isFlippedOnY() const noexcept;
 
     /**
+     * @brief Checks to see if the texture is flipped diagonally.
+     * @return If the texture is flipped on the Y axis.
+     */
+    [[nodiscard]] bool isFlippedOnXY() const noexcept;
+
+    /**
      * @brief Sets the flip state of the texture.
      *
      * It is possible to flip the UV coordinates used on the sprite's
@@ -414,7 +458,22 @@ namespace ASGE
      * @param texture2D The texture to attach.
      * @return True if successful.
      */
-    virtual bool attach(Texture2D* texture2D) noexcept = 0;
+    virtual bool attach(ASGE::Texture2D* texture2D, AttachMode mode) noexcept = 0;
+
+    virtual bool attach(ASGE::Texture2D* texture2D) noexcept;
+
+    /**
+     * @brief Calculates the mid-point of the sprite.
+     *
+     * Sprites origins are normally 0,0, which maps to the top left.
+     * This function returns the mid-point of the sprite based on
+     * its with and height and its current position in the world.
+     *
+     * @note This midpoint is scaled using the sprites scale factor.
+     * @return The midpoint as an ASGE::Point2D
+     * @see ASGE::Point2D
+     */
+    ASGE::Point2D midpoint() const;
 
     /**
      * @brief Retrieves the rendering order (layer) of the sprite.

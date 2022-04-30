@@ -41,7 +41,9 @@ ASGE::RenderQuad::RenderQuad(ASGE::RenderQuad&& rhs) noexcept :
   shader_id(std::exchange(rhs.shader_id, 0)),
   texture_id(std::exchange(rhs.texture_id, 0)),
   z_order(std::exchange(rhs.z_order, 0)),
-  gpu_data(std::move(rhs.gpu_data))
+  gpu_data(std::move(rhs.gpu_data)),
+  distance(rhs.distance),
+  state(rhs.state)
 {
 
 }
@@ -50,7 +52,9 @@ ASGE::RenderQuad::RenderQuad(const ASGE::RenderQuad& rhs) :
   shader_id(rhs.shader_id),
   texture_id(rhs.texture_id),
   z_order(rhs.z_order),
-  gpu_data(rhs.gpu_data)
+  gpu_data(rhs.gpu_data),
+  distance(rhs.distance),
+  state(rhs.state)
 {
 
 }
@@ -61,6 +65,8 @@ ASGE::RenderQuad& ASGE::RenderQuad::operator=(const ASGE::RenderQuad& rhs)
   this->texture_id = rhs.texture_id;
   this->z_order    = rhs.z_order;
   this->gpu_data   = rhs.gpu_data;
+  this->distance   = rhs.distance;
+  this->state      = rhs.state;
   return *this;
 }
 
@@ -78,5 +84,7 @@ ASGE::RenderQuad& ASGE::RenderQuad::operator=(ASGE::RenderQuad&& rhs) noexcept
   this->texture_id = std::exchange(rhs.texture_id, 0);
   this->z_order    = std::exchange(rhs.z_order, 0);
   this->gpu_data   = std::move(rhs.gpu_data);
+  this->distance   = rhs.distance;
+  this->state      = rhs.state;
   return *this;
 }

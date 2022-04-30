@@ -10,9 +10,11 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
+#include "Logger.hpp"
 #include "GLRenderTarget.hpp"
 #include "GLRenderer.hpp"
 #include "GLTexture.hpp"
+
 ASGE::GLRenderTarget::GLRenderTarget(
   ASGE::Renderer* renderer, int width, int height, ASGE::Texture2D::Format format, int count)
 {
@@ -79,8 +81,7 @@ void ASGE::GLRenderTarget::createFboWithMultiSampledAttachments(ASGE::Renderer* 
       Logging::ERRORS("Trying to attach a texture to framebuffer which is not valid");
       continue;
     }
-    glFramebufferTexture2D(
-      GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D_MULTISAMPLE, buffer->getID(), 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D_MULTISAMPLE, buffer->getID(), 0);
     draw_buffers.emplace_back(GL_COLOR_ATTACHMENT0 + i);
   }
 
@@ -90,7 +91,7 @@ void ASGE::GLRenderTarget::createFboWithMultiSampledAttachments(ASGE::Renderer* 
   // The depth buffer
   glGenRenderbuffers(1, &MSAA_DBO);
   glBindRenderbuffer(GL_RENDERBUFFER, MSAA_DBO);
-  glRenderbufferStorageMultisample(GL_RENDERBUFFER, ASGE::SETTINGS.msaa_level, GL_DEPTH_COMPONENT, width, height);
+  glRenderbufferStorageMultisample(GL_RENDERBUFFER, (renderer)->msaa(), GL_DEPTH_COMPONENT, width, height);
   glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, MSAA_DBO);
 
   if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)

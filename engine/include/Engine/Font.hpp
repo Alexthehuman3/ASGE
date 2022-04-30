@@ -16,6 +16,7 @@
 
 #pragma once
 #include "NonCopyable.hpp"
+#include "Texture.hpp"
 #include <string>
 #include <tuple>
 //#include "Align.hpp"
@@ -49,6 +50,19 @@ namespace ASGE
   struct Font : public NonCopyable
   {
    public:
+    struct AtlasMetrics
+    {
+      std::string id     = "";
+      int width          = 128;
+      int height         = 128;
+      double range       = 2;
+      double size        = 32;
+      double em_size     = 1;
+      double line_height = 1;
+      double ascender    = 1;
+      double descender   = 1;
+    };
+
     //! Default constructor
     Font() = default;
 
@@ -163,9 +177,21 @@ namespace ASGE
     [[nodiscard]] virtual float
     pxHeight(const std::string& string, float scale) const = 0;
 
+    /**
+     * Sets the filtering used for scaling the font upwards.
+     * The mag filter controls how a texture's sampling will operate
+     * when magnified. In general use, font's work well with linear
+     * sampling, but this allows the user to specify nearest neighbour
+     * instead which may lead to crisper results depending on the font
+     * face.
+     * @param[in] mag_filter The magnification filter to use.
+     */
+    virtual void setMagFilter(ASGE::Texture2D::MagFilter mag_filter) = 0;
+
    public:
     const char* font_name = ""; //!< The name of the font loaded.
-    int font_size = 0;          //!< The size of the font imported.
-    float line_height = 0;      //!< The recommended height of each line.
+    float line_height     = 0;  //!< The recommended height of each line.
+    float px_range        = 2;  //!< The pixel range used in the SDF generation.
+    int  font_size        = 0;  //!< The size of the font imported.
   };
 }  // namespace ASGE

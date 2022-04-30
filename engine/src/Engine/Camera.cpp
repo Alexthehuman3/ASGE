@@ -10,7 +10,8 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-#include <Engine/Camera.hpp>
+#include <algorithm>
+#include "Camera.hpp"
 ASGE::Camera::Camera(float width, float height) :
   xy_pos{ 0, 0 },
   dimensions{ width, height } {}
@@ -24,6 +25,12 @@ void ASGE::Camera::update(const ASGE::GameTime& /*game_time*/)
 
 }
 
+void ASGE::Camera::clamp(const ASGE::Camera::CameraView& view_bounds)
+{
+  this->xy_pos.x  = std::clamp(this->xy_pos.x, view_bounds.min_x, view_bounds.max_x);
+  this->xy_pos.y  = std::clamp(this->xy_pos.y, view_bounds.min_y, view_bounds.max_y);
+}
+
 void ASGE::Camera::lookAt(ASGE::Point2D pos)
 {
   this->xy_pos.x = pos.x;
@@ -33,10 +40,10 @@ void ASGE::Camera::lookAt(ASGE::Point2D pos)
 ASGE::Camera::CameraView ASGE::Camera::getView() const
 {
   ASGE::Camera::CameraView view;
-  view.min_x = xy_pos.x - dimensions[0] * 0.5F * zoom;
-  view.min_y = xy_pos.y - dimensions[1] * 0.5F * zoom;
-  view.max_x = view.min_x + dimensions[0] * zoom;
-  view.max_y = view.min_y + dimensions[1] * zoom;
+  view.min_x = xy_pos.x - (dimensions[0] * 0.5F) / zoom;
+  view.min_y = xy_pos.y - (dimensions[1] * 0.5F) / zoom;
+  view.max_x = view.min_x + (dimensions[0]) / zoom;
+  view.max_y = view.min_y + (dimensions[1]) / zoom;
   return view;
 }
 
@@ -75,7 +82,7 @@ float ASGE::Camera::getZoom() const
 
 void ASGE::Camera::setZoom(float z)
 {
-  this->zoom = z;
+  this->zoom = std::max(0.00001F, z);
 }
 
 const ASGE::Point2D& ASGE::Camera::position() const

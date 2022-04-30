@@ -86,7 +86,7 @@ class ASGENetGame : public ASGE::OGLGame
     double time_delta = us.deltaInSecs()*100;
     if (auto gamepad_data = inputs->getGamePad(0); gamepad_data.is_connected)
     {
-      for( int i=0; i<gamepad_data.no_of_buttons; ++i)
+      for( int i=0; i<(int)gamepad_data.buttons; ++i)
       {
         if(gamepad_data.buttons[i] == true)
         {
@@ -182,7 +182,7 @@ class ASGENetGame : public ASGE::OGLGame
         //Insert stuff to render here
         for (auto text : menu_text)
         {
-          renderer->renderText(*text);
+          renderer->render(*text);
         }
         renderer->setProjectionMatrix(0, 1024, 0, 768);
         break;
@@ -195,7 +195,7 @@ class ASGENetGame : public ASGE::OGLGame
         level.render(renderer.get());
         if (current_time > 0)
         {
-          renderer->renderText(*interact_text);
+          renderer->render(*interact_text);
         }
         /*
         //Camera 2
@@ -284,7 +284,6 @@ class ASGENetGame : public ASGE::OGLGame
     int scrn_x = settings.window_width;
     int scrn_y = settings.window_height;
     auto text = menu_text.emplace_back(std::make_shared<ASGE::Text>(renderer->getDefaultFont(),"ASGE Dynamic Map Loader"));
-    text->setScale(2);
     text->setPositionX(scrn_x/2-(text->getWidth()/2));
     text->setPositionY(scrn_y/2-(text->getHeight()/2));
 
@@ -317,7 +316,7 @@ class ASGENetGame : public ASGE::OGLGame
 int main(int /*argc*/, char* /*argv*/[])
 {
   ASGE::GameSettings game_settings;
-  game_settings.window_title  = "ASGEGame";
+  game_settings.game_title  = "ASGEGame";
   game_settings.window_width  = 1024;
   game_settings.window_height = 768;
   game_settings.mode          = ASGE::GameSettings::WindowMode::WINDOWED;

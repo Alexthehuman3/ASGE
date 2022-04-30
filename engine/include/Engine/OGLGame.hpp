@@ -14,7 +14,7 @@
 //! @brief Class @ref ASGE::OGLGame
 
 #pragma once
-#include <Engine/Game.hpp>
+#include "Game.hpp"
 
 namespace ASGE {
 	/**
@@ -36,7 +36,7 @@ namespace ASGE {
 		* Initialises the OpenGL subsystem.
 		* @return True if successful.
 		*/
-		bool initAPI() final;
+		bool initAPI(const ASGE::GameSettings& settings) final;
 		
 		/**
 		* Terminates the OpenGL subsystem.

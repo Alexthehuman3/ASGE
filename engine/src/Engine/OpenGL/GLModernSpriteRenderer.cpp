@@ -10,6 +10,7 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
+#include "Logger.hpp"
 #include <OpenGL/GLAtlas.hpp>
 #include <OpenGL/GLFontSet.hpp>
 #include <OpenGL/GLModernSpriteRenderer.hpp>
@@ -72,7 +73,7 @@ ASGE::GLModernSpriteRenderer::~GLModernSpriteRenderer()
 
 /**
  *  Initialises the Sprite Renderer.
- *  Peforms initialisation of the renderer including the orthogonal view,
+ *  Performs initialisation of the renderer including the orthogonal view,
  *  the shader and the shared buffers. Vertex data does not change and is
  *  stored as static drawing data. The other attributes are treated as
  *  dynamic as they can be altered at any time during the program run.
@@ -88,8 +89,9 @@ bool ASGE::GLModernSpriteRenderer::init()
   basic_text_shader                   = initShader(vs_instancing, fs_text)->getShaderID();
   sprite_shader->use();
   active_shader = sprite_shader;
-  using GLRenderConstants::QUAD_VERTICES;
+  setupGlobalShaderData();
 
+  using GLRenderConstants::QUAD_VERTICES;
   buffer_idx = 0;
   glGenVertexArrays(1, &this->VAO);
   glBindVertexArray(this->VAO);
@@ -155,8 +157,9 @@ int ASGE::GLModernSpriteRenderer::render(
   int draw_count = 0;
   for (const auto& batch : batches)
   {
+    apply(batch.state);
     bindTexture(batch.texture_id);
-    bindShader(batch.shader_id, batch.start_idx);
+    bindShader(batch.shader_id, batch.distance);
 
     glUniform1i(GLRenderConstants::OFFSET_UBO_BIND, batch.start_idx);
     ClearGLErrors("Setting uniform");

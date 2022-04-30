@@ -10,8 +10,8 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-#include <Engine/FileIO.hpp>
-#include <Engine/Renderer.hpp>
+#include "FileIO.hpp"
+#include "Renderer.hpp"
 #include <filesystem>
 #include <fstream>
 
@@ -46,27 +46,34 @@ ASGE::SHADER_LIB::Shader* ASGE::Renderer::initPixelShaderFromFile(const std::str
 	return initPixelShader(std::string(buffer.data.get(), buffer.length));
 }
 
-void ASGE::Renderer::renderText(std::string str, int x, int y)
+void ASGE::Renderer::render(ASGE::Texture2D& texture, const ASGE::Point2D& pos_xy, int16_t z_order)
 {
-  renderText({getDefaultFont(), std::move(str), x, y, default_text_colour});
+  render(
+    texture, { 0, 0, texture.getWidth(), texture.getHeight() }, pos_xy,
+    static_cast<int>(texture.getWidth()), static_cast<int>(texture.getHeight()), z_order);
 }
 
-void ASGE::Renderer::renderText(std::string str, int x, int y, const Colour& colour)
+void ASGE::Renderer::msaa(int msaa)
 {
-  renderText({getDefaultFont(), std::move(str), x, y, colour});
+  this->msaa_level = msaa;
 }
 
-void ASGE::Renderer::render(const ASGE::Sprite& sprite)
+int ASGE::Renderer::msaa() const
 {
-  renderSprite(sprite);
+  return msaa_level;
 }
 
-void ASGE::Renderer::render(const ASGE::Text& text)
+void ASGE::Renderer::magFilter(ASGE::Texture2D::MagFilter mag)
 {
-  renderText(text);
+  this->mag_filter = mag;
 }
 
-void ASGE::Renderer::render(const ASGE::Text&& text)
+ASGE::Texture2D::MagFilter ASGE::Renderer::magFilter() const
 {
-  renderText(text);
+  return mag_filter;
+}
+
+const ASGE::Font* ASGE::Renderer::loadFont(const char* font, int size)
+{
+  return this->loadFont(font, size, 2.0);
 }

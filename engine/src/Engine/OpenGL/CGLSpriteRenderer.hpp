@@ -44,10 +44,12 @@ namespace ASGE
     ASGE::SHADER_LIB::GLShader* initShader(const std::string& vertex_shader, const std::string& fragment_shader);
     void quadGen(const GLSprite& sprite, GPUQuad& dest) noexcept;
     void createCharQuad( const GLCharRender& character, const ASGE::Colour& colour, ASGE::GPUQuad& quad) const;
+    void clearActiveRenderState();
 
     [[nodiscard]] virtual GLRenderer::RenderLib getRenderLib() const = 0;
     [[nodiscard]] unsigned int getDefaultTextShaderID() const noexcept;
     [[nodiscard]] unsigned int getBasicSpriteShaderID() const noexcept;
+
     void setActiveShader(ASGE::SHADER_LIB::GLShader* shader);
     ASGE::SHADER_LIB::GLShader* activeShader();
 
@@ -57,16 +59,22 @@ namespace ASGE
     GLuint  vertex_buffer = 0;
     GLuint  VAO = 0;
     GLuint  current_loaded_texture = 0;
+    GLuint  shader_data_location = 0;
+    RenderState* active_render_state {nullptr};
     SHADER_LIB::GLShader* active_shader = nullptr;
 
     void generateSpriteMatrixData(const ASGE::GLSprite& sprite, glm::mat4* model_matrix) const;
     void generateColourData(const ASGE::GLSprite& sprite, glm::vec4* rgba) const;
     void generateUvData(const ASGE::GLSprite& sprite, GLfloat[GLRenderConstants::UVS_PER_QUAD]) const;
     void checkForErrors() const;
-    bool bindShader(GLuint shader_id, GLuint start_idx) noexcept;
+    bool bindShader(GLuint shader_id, GLfloat distance) noexcept;
     void lockBuffer(GLsync& sync_prim);
     void waitBuffer(GLsync& sync_prim);
     bool bindTexture(GLuint texture_id);
+
+    // work in progress
+    void apply(ASGE::RenderState* state);
+    void setupGlobalShaderData();
   };
 
 }

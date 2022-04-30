@@ -13,26 +13,30 @@
 #pragma once
 #include "GLShader.hpp"
 #include "GLTexture.hpp"
-#include <Engine/Sprite.hpp>
+#include "Sprite.hpp"
 #include <string>
 
 namespace ASGE
 {
+  struct Tile;
+
   /**
    * GLSprite is the OpenGL implementation of an ASGE::Sprite
    */
 	class GLSprite final: public ASGE::Sprite
 	{
    public:
-    GLSprite() = default;
+    GLSprite();
     ~GLSprite() override = default;
-    bool attach(Texture2D* texture_to_attach) noexcept override;
-    bool loadTexture(const std::string& file) override;
+    explicit GLSprite(const ASGE::Tile&);
+    bool attach(ASGE::Texture2D* texture_to_attach, AttachMode mode) noexcept override;
+    bool loadTexture(const std::string& file, AttachMode mode) override;
     [[nodiscard]] Texture2D* getTexture() const override;
     [[nodiscard]] const GLTexture* asGLTexture() const noexcept;
     [[nodiscard]] const SHADER_LIB::GLShader* asGLShader() const;
 
   private:
 		GLTexture* texture = nullptr;
-	};
+    void attach(AttachMode mode);
+  };
 }

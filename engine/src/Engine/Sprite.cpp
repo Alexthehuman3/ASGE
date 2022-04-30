@@ -10,8 +10,8 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-#include <Engine/Logger.hpp>
-#include <Engine/Sprite.hpp>
+#include "Logger.hpp"
+#include "Sprite.hpp"
 #include <cmath>
 
 float ASGE::Sprite::xPos() const noexcept
@@ -98,6 +98,11 @@ bool ASGE::Sprite::isFlippedOnX() const noexcept
 bool ASGE::Sprite::isFlippedOnY() const noexcept
 {
   return (flip_flags & FLIP_Y) == FLIP_Y;
+}
+
+bool ASGE::Sprite::isFlippedOnXY() const noexcept
+{
+  return (flip_flags & FLIP_XY) == FLIP_XY;
 }
 
 void ASGE::Sprite::setFlipFlags(FlipFlags flip) noexcept
@@ -228,4 +233,22 @@ std::array<float, 2>& ASGE::Sprite::dimensions()
 std::tuple<int, int> ASGE::Sprite::dimensions() const noexcept
 {
   return std::make_tuple(static_cast<int>(width()), static_cast<int>(height()));
+}
+
+bool ASGE::Sprite::loadTexture(const std::string& id)
+{
+  return loadTexture(id, AttachMode(AttachMode::DEFAULT));
+}
+
+bool ASGE::Sprite::attach(ASGE::Texture2D* texture2D) noexcept
+{
+  return attach(texture2D, AttachMode(AttachMode::DEFAULT));
+}
+
+ASGE::Point2D ASGE::Sprite::midpoint() const
+{
+  return {
+    xPos() + width() * scale_factor * 0.5F,
+    yPos() + height() * scale_factor * 0.5F
+  };
 }

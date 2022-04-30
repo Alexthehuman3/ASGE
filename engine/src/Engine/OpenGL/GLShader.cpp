@@ -10,8 +10,9 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-#include "GLShader.hpp"
 #include <iostream>
+#include "Logger.hpp"
+#include "GLShader.hpp"
 
 ASGE::SHADER_LIB::GLShader::~GLShader()
 {
@@ -350,6 +351,7 @@ void ASGE::SHADER_LIB::GLShader::mapUniforms()
       }
       case GL_INT:
       case GL_SAMPLER_2D:
+      case GL_SAMPLER_2D_ARRAY:
       {
         getUniforms().emplace(uniform_record(
           name, new UniformGL<Uniform1i>(this->ID, location, &GLShader::setInteger)));

@@ -10,9 +10,10 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
+#include "Logger.hpp"
+#include "Renderer.hpp"
 #include "SplashScreen.hpp"
-#include <Engine/Logger.hpp>
-#include <Engine/Renderer.hpp>
+
 void ASGE::SplashScreen::update(float delta_time)
 {
   if (!animation.isFinished())
@@ -57,7 +58,7 @@ void ASGE::SplashScreen::render(float /*delta_time*/)
   }
 
   this->image->opacity(opacity);
-  renderer->renderSprite(*this->image);
+  renderer->render(*this->image);
 }
 
 bool ASGE::SplashScreen::finished() const noexcept

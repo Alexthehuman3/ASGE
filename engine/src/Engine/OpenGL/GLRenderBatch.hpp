@@ -1,7 +1,7 @@
 #pragma once
 #include "GLIncludes.hpp"
 #include "GLQuad.hpp"
-#include <Engine/Sprite.hpp>
+#include "Sprite.hpp"
 #include <bitset>
 #include <list>
 #include <variant>
@@ -52,13 +52,16 @@ namespace ASGE
       NO_MORE_TO_RENDER = 1,
       SHADER_CHANGE     = 2,
       TEXTURE_CHANGE    = 3,
-      REASON_COUNT      = 4
+      STATE_CHANGE      = 4,
+      REASON_COUNT
     };
 
     GLuint start_idx      = 0;
     GLuint instance_count = 0;
     GLuint shader_id      = 0;
     GLuint texture_id     = 0;
+    GLuint distance       = 0;
+    RenderState* state    = nullptr;
 
     std::bitset<REASON_COUNT> reason = I_DONT_KNOW;
   };

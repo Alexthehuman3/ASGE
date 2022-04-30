@@ -10,11 +10,11 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
+#include "Logger.hpp"
 #include "GLTexture.hpp"
 #include "GLFormat.hpp"
 #include "GLIncludes.hpp"
 #include "GLPixelBuffer.hpp"
-#include <cassert>
 
 ASGE::GLTexture::GLTexture(int width, int height) : Texture2D(width, height) {}
 
@@ -98,4 +98,16 @@ void ASGE::GLTexture::updateUVWrapping(Texture2D::UVWrapMode s, Texture2D::UVWra
 {
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GLTexture::GL_UVWRAP_LOOKUP.at(s));
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GLTexture::GL_UVWRAP_LOOKUP.at(t));
+}
+
+void ASGE::GLTexture::updateMinFilter(ASGE::Texture2D::MinFilter filter)
+{
+  GLVCMD(glActiveTexture, GL_TEXTURE0);
+  GLVCMD(glBindTexture ,GL_TEXTURE_2D,getID());
+  GLVMSG(
+    "Setting Mag Filter",
+    glTexParameteri,
+    GL_TEXTURE_2D,
+    GL_TEXTURE_MIN_FILTER,
+    GLTexture::GL_MIN_LOOKUP.at(filter));
 }

@@ -15,14 +15,16 @@
 #include <map>
 #include <memory>
 #include <string>
-#include "Engine/NonCopyable.hpp"
 #include "GLTexture.hpp"
+#include "NonCopyable.hpp"
 
 namespace ASGE
 {
+  class GLRenderer;
   class GLTextureCache final : public NonCopyable
   {
    public:
+    friend class GLRenderer;
     GLTextureCache(const GLTextureCache&) = delete;
     GLTextureCache operator=(const GLTextureCache&) = delete;
     static GLTextureCache& getInstance()
@@ -35,7 +37,7 @@ namespace ASGE
     ASGE::GLTexture* createNonCached(int img_width, int img_height, Texture2D::Format format, void* data);
     ASGE::GLTexture* createNonCached(const std::string& path);
     ASGE::GLTexture* createNonCachedMSAA(int img_width, int img_height, Texture2D::Format format);
-    ASGE::GLTexture* createCached(const std::string& id, int img_width, int img_height, GLTexture::Format format, void* data);
+    ASGE::GLTexture* createCached(const std::string& uid, int img_width, int img_height, GLTexture::Format format, void* data);
     void reset();
 
    private:
@@ -43,10 +45,12 @@ namespace ASGE
     ~GLTextureCache();
 
     ASGE::GLTexture* allocateMSAATexture(int img_width, int img_height, Texture2D::Format format);
+    ASGE::GLTexture* allocateTextureArray(int img_width, int img_height, Texture2D::Format format, const void* data, int count);
     ASGE::GLTexture* allocateTexture(int img_width, int img_height, Texture2D::Format format, const void* data);
     ASGE::GLTexture* allocateTexture(const std::string& file);
 
-    // the cache
+    // the cache and renderer to use
 		std::map<const std::string, std::unique_ptr<GLTexture>> cache;
+    ASGE::GLRenderer* renderer {nullptr};
   };
 }  // namespace ASGE

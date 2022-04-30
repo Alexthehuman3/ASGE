@@ -12,15 +12,17 @@
 
 // STB
 #define STB_IMAGE_IMPLEMENTATION
-#include "GLTextureCache.hpp"
-#include "Engine/FileIO.hpp"
+#include <cmath>
+#include <memory>
+#include <stb_image.h>
+
+#include "FileIO.hpp"
+#include "Logger.hpp"
 #include "GLFormat.hpp"
 #include "GLIncludes.hpp"
 #include "GLRenderer.hpp"
 #include "GLTexture.hpp"
-#include <cmath>
-#include <memory>
-#include <stb_image.h>
+#include "GLTextureCache.hpp"
 
 ASGE::GLTextureCache::~GLTextureCache()
 {
@@ -80,12 +82,10 @@ ASGE::GLTexture* ASGE::GLTextureCache::createNonCached(
   return allocateTexture(img_width, img_height, format, data);
 }
 
-ASGE::GLTexture* ASGE::GLTextureCache::createNonCachedMSAA(
-  int img_width, int img_height, ASGE::Texture2D::Format format)
+ASGE::GLTexture* ASGE::GLTextureCache::createNonCachedMSAA(int img_width, int img_height, Texture2D::Format format)
 {
   return allocateMSAATexture(img_width, img_height, format);
 }
-
 
 ASGE::GLTexture* ASGE::GLTextureCache::allocateTexture(const std::string& file)
 {
@@ -125,7 +125,6 @@ ASGE::GLTexture* ASGE::GLTextureCache::allocateTexture(const std::string& file)
   return texture;
 }
 
-
 ASGE::GLTexture*
 ASGE::GLTextureCache::allocateTexture(
   int img_width, int img_height, Texture2D::Format format, const void* data)
@@ -155,7 +154,7 @@ ASGE::GLTextureCache::allocateTexture(
 
   // Use the default game settings for mag filtering
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
-                  GLTexture::GL_MAG_LOOKUP.at(ASGE::SETTINGS.mag_filter));
+                  GLTexture::GL_MAG_LOOKUP.at(renderer->magFilter()));
 
   if(data != nullptr)
   {
@@ -167,7 +166,7 @@ ASGE::GLTextureCache::allocateTexture(
     // Anisotropic filtering
     float aniso_level = 16;
     glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, &aniso_level);
-    aniso_level = std::min(float(ASGE::SETTINGS.anisotropic), aniso_level);
+    //aniso_level = std::min(float(renderer->ansio()), aniso_level);
     glTextureParameterf(texture->getID(), GL_TEXTURE_MAX_ANISOTROPY, aniso_level);
   }
 
@@ -175,8 +174,7 @@ ASGE::GLTextureCache::allocateTexture(
   return texture;
 }
 
-ASGE::GLTexture* ASGE::GLTextureCache::allocateMSAATexture(
-  int img_width, int img_height, ASGE::Texture2D::Format format)
+ASGE::GLTexture* ASGE::GLTextureCache::allocateMSAATexture(int img_width, int img_height, Texture2D::Format format)
 {
   auto *texture = new GLTexture(img_width, img_height);
   texture->setFormat(format);
@@ -184,7 +182,44 @@ ASGE::GLTexture* ASGE::GLTextureCache::allocateMSAATexture(
   // Allocate a texture
   glGenTextures(1, &texture->getID());
   glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, texture->getID());
-  glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, ASGE::SETTINGS.msaa_level, GLFORMAT[texture->getFormat()], img_width, img_height, GL_TRUE);
+  glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, renderer->msaa(), GLFORMAT[texture->getFormat()], img_width, img_height, GL_TRUE);
   glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
+  return texture;
+}
+
+ASGE::GLTexture* ASGE::GLTextureCache::allocateTextureArray(
+  int img_width, int img_height, ASGE::Texture2D::Format format, const void* data, int count)
+{
+  auto *texture = new GLTexture(img_width, img_height);
+  texture->setFormat(format);
+
+  glGenTextures(1, &texture->getID());
+  glBindTexture(GL_TEXTURE_2D_ARRAY, texture->getID());
+
+  // Load the 2D texture
+  glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_RGBA8, img_width, img_height, count);
+
+  // Upload pixel data
+  glTexSubImage3D(GL_TEXTURE_2D_ARRAY,
+                  0, 0, 0, 0, img_width, img_height, count, GLFORMAT[texture->getFormat()],
+                  GL_UNSIGNED_BYTE, data);
+
+  // Set texture options
+  glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+
+  // Use the default game settings for mag filtering
+  glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER,
+                  GLTexture::GL_MAG_LOOKUP.at(renderer->magFilter()));
+
+  if(data != nullptr)
+  {
+    glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
+  }
+
+  glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
+
+  ASGE::ClearGLErrors("Error: Allocating texture array!");
   return texture;
 }

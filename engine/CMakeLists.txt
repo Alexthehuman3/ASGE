@@ -3,8 +3,8 @@ set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15" CACHE STRING "Minimum OS X deployment ve
 project(asge)
 string(TIMESTAMP date "%Y%m%d")
 set(ASGE_VERSION_MAJOR "3")
-set(ASGE_VERSION_MINOR "1")
-set(ASGE_VERSION_PATCH "1")
+set(ASGE_VERSION_MINOR "2")
+set(ASGE_VERSION_PATCH "0")
 set(ASGE_VERSION_EXTRA "${date}")
 set(ASGE_VERSION "${ASGE_VERSION_MAJOR}.${ASGE_VERSION_MINOR}")
 set(ASGE_VERSION_FULL "${ASGE_VERSION}.${ASGE_VERSION_PATCH}${ASGE_VERSION_EXTRA}")
@@ -34,6 +34,7 @@ set( PROJECT_HEADERS
 		"${CMAKE_CURRENT_LIST_DIR}/include/Engine/Point2D.hpp"
 		"${CMAKE_CURRENT_LIST_DIR}/include/Engine/RenderTarget.hpp"
 		"${CMAKE_CURRENT_LIST_DIR}/include/Engine/Renderer.hpp"
+		"${CMAKE_CURRENT_LIST_DIR}/include/Engine/Resolution.hpp"
 		"${CMAKE_CURRENT_LIST_DIR}/include/Engine/Shader.hpp"
 		"${CMAKE_CURRENT_LIST_DIR}/include/Engine/Sprite.hpp"
 		"${CMAKE_CURRENT_LIST_DIR}/include/Engine/Texture.hpp"
@@ -53,6 +54,7 @@ set( PROJECT_SOURCES
 		"${CMAKE_CURRENT_LIST_DIR}/src/Engine/OGLGame.cpp"
 		"${CMAKE_CURRENT_LIST_DIR}/src/Engine/Point2D.cpp"
 		"${CMAKE_CURRENT_LIST_DIR}/src/Engine/Renderer.cpp"
+		"${CMAKE_CURRENT_LIST_DIR}/src/Engine/Resolution.cpp"
 		"${CMAKE_CURRENT_LIST_DIR}/src/Engine/Shader.cpp"
 		"${CMAKE_CURRENT_LIST_DIR}/src/Engine/Sprite.cpp"
 		"${CMAKE_CURRENT_LIST_DIR}/src/Engine/Text.cpp"
@@ -73,6 +75,7 @@ set( PROJECT_SOURCES
 		"${CMAKE_CURRENT_LIST_DIR}/src/Engine/OpenGL/GLPixelBuffer.cpp"
 		"${CMAKE_CURRENT_LIST_DIR}/src/Engine/OpenGL/GLRenderBatch.hpp"
 		"${CMAKE_CURRENT_LIST_DIR}/src/Engine/OpenGL/GLRenderBatch.cpp"
+		"${CMAKE_CURRENT_LIST_DIR}/src/Engine/OpenGL/GLRenderState.hpp"
 		"${CMAKE_CURRENT_LIST_DIR}/src/Engine/OpenGL/GLRenderTarget.hpp"
 		"${CMAKE_CURRENT_LIST_DIR}/src/Engine/OpenGL/GLRenderTarget.cpp"
 		"${CMAKE_CURRENT_LIST_DIR}/src/Engine/OpenGL/GLRenderer.hpp"
@@ -92,7 +95,8 @@ set( PROJECT_SOURCES
 		"${CMAKE_CURRENT_LIST_DIR}/src/Engine/OpenGL/GLTextureCache.hpp"
 		"${CMAKE_CURRENT_LIST_DIR}/src/Engine/OpenGL/GLTextureCache.cpp"
 		"${CMAKE_CURRENT_LIST_DIR}/src/Engine/OpenGL/GLLegacySpriteRenderer.hpp"
-		"${CMAKE_CURRENT_LIST_DIR}/src/Engine/OpenGL/GLLegacySpriteRenderer.cpp"	)
+		"${CMAKE_CURRENT_LIST_DIR}/src/Engine/OpenGL/GLLegacySpriteRenderer.cpp"
+		"${CMAKE_CURRENT_LIST_DIR}/src/Engine/OpenGL/GLWindowData.hpp")
 
 set(PROJECT_CONFIG
     CMakeLists.txt LICENSE
@@ -132,12 +136,14 @@ target_sources( ${PROJECT_NAME}
 # compiling the library and added to build paths. 
 target_include_directories( ${PROJECT_NAME}
 		SYSTEM
-		PUBLIC
+		INTERFACE
         $<INSTALL_INTERFACE:include>
 		"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+		PUBLIC
 		"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/libs/physfs++/include>"
 		"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/libs/physfs/src>"
       	PRIVATE
+		"${CMAKE_CURRENT_SOURCE_DIR}/include/Engine"
 		"${CMAKE_CURRENT_SOURCE_DIR}/src/Engine"
 		"${CMAKE_CURRENT_SOURCE_DIR}/libs/glfw/include"
 		"${CMAKE_CURRENT_SOURCE_DIR}/libs/glm"
@@ -171,8 +177,7 @@ endif()
 
 # Dependencies on other libraries
 target_link_libraries( ${PROJECT_NAME} PUBLIC ${LINK_LIBS})
-add_dependencies( ${PROJECT_NAME}  freetype)
-add_dependencies( ${PROJECT_NAME}  PhysFS++)
+add_dependencies( ${PROJECT_NAME} PhysFS++)
 
 target_compile_definitions(
 		${PROJECT_NAME}

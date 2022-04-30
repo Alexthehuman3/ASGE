@@ -10,8 +10,8 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-#include <Engine/Point2D.hpp>
 #include <cmath>
+#include "Point2D.hpp"
 
 ASGE::Point2D::Point2D(float x, float y) : x(x), y(y) {}
 
@@ -75,5 +75,15 @@ std::string ASGE::Point2D::toString() const
 
 ASGE::Point2D ASGE::operator*(float f, const ASGE::Point2D& v)
 {
-  return Point2D(f * v.x, f * v.y);
+  return {f * v.x, f * v.y};
+}
+
+bool ASGE::Point2D::operator==(const ASGE::Point2D& rhs) const
+{
+  return (this->x == rhs.x && this->y == rhs.y);
+}
+
+bool ASGE::Point2D::operator!=(const ASGE::Point2D& rhs) const
+{
+  return (this->x != rhs.x || this->y == rhs.y);
 }

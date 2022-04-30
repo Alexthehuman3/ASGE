@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 3.14.0)
+set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15" CACHE STRING "Minimum OSX deployment version")
 project(ASGE)
 
-option(ASGE_BUILD_DEMOS     "Build sample demos for ASGE" true)
+option(ASGE_BUILD_DEMOS     "Build sample demos for ASGE" false)
 option(ASGE_ENABLE_DOXYGEN  "Enables doxygen support for ASGE" true)
 option(ENGINE_SHARED_LIB    "Build game engine as a shared library" false)
 option(FREETYPE_SHARED_LIB  "Build freetype as a shared library" false)
@@ -9,6 +10,7 @@ option(GLAD_SHARED_LIB      "Build glad as a shared library" false)
 option(GLFW_SHARED_LIB      "Build glfw as a shared libary" false)
 option(PHYSFS_SHARED_LIB    "Build physfs++ as a shared library" false)
 option(MONOLITHIC_BUILD     "Link all libraries into single dynamic one" true)
+option(ENABLE_MSDFGEN       "Build MSDF library for signed distanced fonts" true)
 
 if(ENGINE_SHARED_LIB)
     if(MONOLITHIC_BUILD)

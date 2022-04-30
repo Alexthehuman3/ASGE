@@ -10,11 +10,11 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-#include <Engine/FileIO.hpp>
-#include <Engine/Logger.hpp>
 #include <PhysFS/PhysFS.hpp>
 #include <cstring>
 #include <string>
+#include "FileIO.hpp"
+#include "Logger.hpp"
 
 using namespace PhysFS;
 using namespace ASGE;
@@ -207,7 +207,7 @@ std::vector<std::string> ASGE::FILEIO::enumerateFiles(const std::string& dir)
     return PhysFS::enumerateFiles(dir);
   }
 
-  return std::vector<std::string>();
+  return {};
 }
 
 bool FILEIO::mount(const std::string& dir, const std::string& mount_point)

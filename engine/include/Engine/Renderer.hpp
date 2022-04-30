@@ -15,11 +15,13 @@
 
 #pragma once
 #include "Camera.hpp"
-#include "Engine/Colours.hpp"
-#include "Engine/Texture.hpp"
+#include "Colours.hpp"
 #include "GameSettings.hpp"
 #include "Text.hpp"
+#include "Texture.hpp"
+#include "Tile.hpp"
 #include "Viewport.hpp"
+#include "Resolution.hpp"
 #include <memory>
 #include <string>
 
@@ -77,28 +79,53 @@ namespace ASGE {
     virtual void setClearColour(Colour rgb) = 0;
 
    /**
-    *  Loads a font that can be used to render text
+    *  Loads a font that can be used to render text.
+    *  Creates an SDF set of characters that can be used to render text.
+    *  This version of the function will attempt to load a local file
+    *  and convert the font using a distance range of 2.0.
     *
     *  @param[in] font The filepath to the font file.
-    *  @param[in] pt The size of the font to use in atlas generation.
-    *
-    *  @return The loaded font index.
+    *  @param[in] size The size of the glyphs to use in atlas generation.
+    *  @return A pointer to the loaded font.
     */
-   virtual int loadFont(const char* font, int pt) = 0;
+    const Font* loadFont(const char* font, int size);
 
     /**
-     *  Loads a font that can be used to render text
+     * Loads a font that can be used to render text.
+     * Creates an SDF set of characters that can be used to render text.
+     * @param[in] font The filepath to the font file.
+     * @param[in] size The size of the glyphs to use in atlas generation.
+     * @param[in] range The distance range to use.
+     * @return A pointer to the loaded font.
+     */
+     virtual const Font* loadFont(const char* font, int size, double range) = 0;
+
+    /**
+     *  Loads a font that can be used to render text.
      *
      *  @param[in] name The name of the font.
      *  @param[in] data A binary font loaded in memory.
      *  @param[in] size The buffer size.
-     *  @param[in] pt The size of the font to use in atlas generation.
-     *
-     *  @return The loaded font index.
+     *  @param[in] size The size of the font to use in atlas generation.
+     *  @return A pointer to the loaded font.
      */
-    virtual int loadFontFromMem(const char* name, const unsigned char* data, unsigned int size, int pt) = 0;
+     virtual const Font* loadFontFromMem(const char* name, const unsigned char* data, unsigned int len, int size, double range) = 0;
 
-   /**
+    /**
+     * Loads a font atlas that can be used to render text.
+     * Attempts to create a new atlas for rendering text using a pre-existing
+     * image file and accompanying CSV file. The advantage to this is the ability
+     * to use more computationally expensive algorithms and a significant reduction
+     * in load times. This function was designed with
+     * <a href="https://github.com/Chlumsky/msdf-atlas-gen/tree/master/msdf-atlas-gen">msdf-atlas-gen</a>
+     * in mind.
+     * @param [in] metrics The font metrics used to render text.
+     * @param [in] img_path The location of the image file to load.
+     * @param [in] csv_path The CSV data that defines each glyph.
+     */
+     virtual const Font* loadFontAtlas(Font::AtlasMetrics&& metrics, const std::string& img_path, const std::string& csv_path) = 0;
+
+    /**
     *  @brief Initialises the renderer.
     *
     *  Performs all the initialisation of the renderer, its framework and the
@@ -111,7 +138,7 @@ namespace ASGE {
     *  @return True if success.
     *  @see WindowMode
     */
-   virtual bool init() = 0;
+    virtual bool init(const ASGE::GameSettings& settings) = 0;
 
 		/**
 		*  Exits the renderer and performs clean-up. 
@@ -136,41 +163,6 @@ namespace ASGE {
     virtual void postRender() = 0;
 
    /**
-    *  Renders a string to the screen.
-    *  @deprecated since 2.0
-    *  @see RenderString
-    *
-    *  @param [in] str The text to render.
-    *  @param [in] x The text position in the X axis.
-    *  @param [in] y The text starting position in the Y axis.
-    *  @param [in] colour The colour to use for rendering.
-    */
-   void renderText(std::string str, int x, int y, const Colour& colour);
-
-    /**
-     *  Renders a string to the screen.
-     *  @deprecated since 2.0
-     *  @see RenderString
-     *
-     *  @param [in] str The text to render.
-     *  @param [in] x The text position in the X axis.
-     *  @param [in] y The text starting position in the Y axis.
-     */
-    void renderText(std::string str, int x, int y);
-
-    /**
-     * Renders a text object.
-     * @param[in] text The temporary text object to render.
-     */
-    virtual void renderText(Text&& text) = 0;
-
-    /**
-     * Renders a text object.
-     * @param[in] text The text object to render.
-     */
-    virtual void renderText(const Text& text) = 0;
-
-    /**
      *  @brief Sets the default text colour.
      *
      *  When rendering text, if a colour is not specified the default one will
@@ -230,18 +222,6 @@ namespace ASGE {
     virtual void setFont(int id) = 0;
 
     /**
-     *  @brief Renders a sprite to the screen.
-     *
-     *  All the rendering params are stored within the sprite
-     *  class itself.
-     *
-     *  @param [in] sprite A reference to the sprite to render.
-     *  @see Sprite
-     *  @deprecated since 2.1
-     */
-    virtual void renderSprite(const Sprite& sprite) = 0;
-
-    /**
      *  Sets the sprite rendering mode. Useful for batching.
      *  @param[in] mode The SpriteSortMode used for rendering.
      *  @see SpriteSortMode
@@ -296,31 +276,90 @@ namespace ASGE {
     virtual Sprite*	createRawSprite() = 0;
 
     /**
-     * Renders a sprite.
-     * @param[in] sprite The sprite to render.
+     *  @brief Renders a sprite to the screen.
+     *
+     *  All the rendering params are stored within the sprite
+     *  class itself.
+     *
+     *  @param [in] sprite A reference to the sprite to render.
+     *  @see Sprite
      */
-    virtual void render(const ASGE::Sprite& sprite);
+    virtual void render(const ASGE::Sprite& sprite) = 0;
+
+    /**
+     * Renders a tile object.
+     * @param[in] tile The text object to render.
+     */
+    virtual void render(const ASGE::Tile& tile, const ASGE::Point2D& xy) = 0;
 
     /**
      * Renders a text object.
      * @param[in] text The text object to render.
      */
-    virtual void render(const ASGE::Text& text);
+    virtual void render(const ASGE::Text& text) = 0;
 
     /**
      * Renders a temporary text object.
      * @param[in] text The temporary text object to render.
      */
-    virtual void render(const ASGE::Text&& text);
+    virtual void render(ASGE::Text&& text) = 0;
 
     /**
-     * Renders a texture.
+     * @brief Renders a texture.
+     *
+     * Acts as as simple proxy function for rendering textures. This shorthand
+     * function actually calls the longhand version of the function using the
+     * texture's own properties to define sensible defaults i.e. sample the
+     * whole texture and render it at the same width and height it was originally
+     * defined as.
      *
      * @param[in] texture The texture to render.
-     * @param[in] x The x position of the rendered texture.
-     * @param[in] y The y position of the rendered texture.
+     * @param[in] pos_xy The xy position of the rendered texture in 2D Space.
+     * @param[in] z_order The z-ordering to use.
      */
-    virtual void render(ASGE::Texture2D& texture, int x, int y) = 0;
+    void render(ASGE::Texture2D& texture, const ASGE::Point2D& pos_xy, int16_t z_order);
+
+    /**
+     * @brief Renders a texture to the screen or attached buffer.
+     *
+     * Typically an ASGE::Sprite is used for rendering. Textures are attached
+     * to these objects and the positional and source rectangle information
+     * is used to generate the matrices required for rendering. However, on
+     * occasion it might be preferable to store a texture directly without the
+     * extra positional data. For example a tile map can be made up from a list
+     * or array of textures. When rendering the absolute position can be
+     * forwarded on to the renderer along with the UV mapping and this function
+     * will take care of the rest (it basically maps to a temporary sprite object).
+     *
+     * <example>
+     * @code
+     *   auto [width, height, std::ignore] = renderer->screenRes();
+     *   struct Tile
+     *   {
+     *     public:
+     *       ASGE::Texture2D* texture = nullptr;
+     *       std::array<float,4> source_rectangle {0};
+     *    };
+     *
+     *    // create a tile with a texture and source rectangle
+     *    Tile tile;
+     *    tile.texture = renderer->createCachedTexture("/data/img/tile_sheet.png");
+     *    tile.source_rectangle = {0, 0, 64, 64};
+     *
+     *    // some moments later
+     *    renderer->render(*tile.texture, tile.source_rectangle, ASGE::Point2D{0,0}, 64, 64);
+     * @endcode
+     * </example>
+     *
+     * @param[in] texture The texture to be sampled.
+     * @param[in] rect The source rectangle to use when sampling.
+     * @param[in] pos_xy The position to render the texture in 2D space.
+     * @param[in] width How wide to render it.
+     * @param[in] height How tall to render it.
+     * @param[in] z_order The z ordering to use.
+     */
+    virtual void
+    render(ASGE::Texture2D& texture, std::array<float, 4> rect, const Point2D& pos_xy, int width, int height, int16_t z_order) = 0;
 
     /**
      * @brief Creates a non-cached texture.
@@ -390,6 +429,21 @@ namespace ASGE {
      * requested ID
      */
     virtual ASGE::Texture2D* createCachedTexture(std::string id, int width, int height, ASGE::Texture2D::Format format, void* data) = 0;
+
+    /**
+     * @brief Creates a cached version of a 2D Texture Array
+     *
+     * 2D Texture Arrays can be used to store images on different layers.
+     * @param[in] id The unique id to use.
+     * @param[in] width The width of the textures in the array.
+     * @param[in] height The height of the textures in the array.
+     * @param[in] format The format of the pixels being stored.
+     * @param[in] data Initial data to upload.
+     * @param[in] count The number of layers to allocate.
+     *
+     * @return A pointer to the cached @refitem ASGE::Texture2D
+     */
+    virtual ASGE::Texture2D* createCachedTextureArray(std::string id, int width, int height, ASGE::Texture2D::Format format, void* data, int count) = 0;
 
     /**
      * @brief Creates a cached texture from a file.
@@ -468,13 +522,13 @@ namespace ASGE {
      * Retrieves the window height.
      * @return The window height.
      */
-    [[nodiscard]] virtual float windowHeight() const noexcept = 0;
+    [[nodiscard]] virtual int windowHeight() const noexcept = 0;
 
     /**
      * Retrieves the window width.
      * @return The window width.
      */
-    [[nodiscard]] virtual float windowWidth()  const noexcept = 0;
+    [[nodiscard]] virtual int windowWidth()  const noexcept = 0;
 
     /**
      * @brief Sets the projection matrix
@@ -512,7 +566,7 @@ namespace ASGE {
     [[nodiscard]] virtual ASGE::Viewport getViewport() const = 0;
 
     /**
-     * @brief Sets the viewport used to map the renderer to the window.
+     * @brief Sets the viewport used to map the x,y ndc to the window or buffer.
      * @param[in] viewport Sets the viewport.
      */
     virtual void setViewport(const ASGE::Viewport& viewport) = 0;
@@ -526,7 +580,7 @@ namespace ASGE {
      *
     *  @param[in] render_target. The destination target.
     */
-    virtual void setRenderTarget(const ASGE::RenderTarget*) = 0;
+    virtual void setRenderTarget(RenderTarget*) = 0;
 
 
     /**
@@ -550,17 +604,115 @@ namespace ASGE {
      */
     virtual std::tuple<int32_t, int32_t, int16_t> screenRes() = 0;
 
+    /**
+     * @brief Sets the base (game) resolution.
+     *
+     * When designing the game, the positioning, scaling and logic
+     * will be implemented with a specific "resolution" in mind. However,
+     * when rendering the window size may not match the base resolution
+     * correctly, resulting in scaling. Setting this will allow the
+     * window to resize correctly, depending on the policy used. Designing
+     * games to support multiple resolutions is quite tricky and this
+     * function aims to help with this complexity. Simply set your game
+     * resolution and let the policy do the work for you.
+     *
+     * @note The base resolution is not in pixels, rather game units.
+     * @param width. The width the game was designed in.
+     * @param height. The height the game was designed in.
+     * @param policy. The scaling policy to apply when window size does not match.
+     *
+     * <example>
+     * @code
+     *   // game is 1024,768 units; scale to window but retain its aspect ratio
+     *   renderer->setBaseResolution(1024, 768, ASGE::Resolution::Policy::MAINTAIN);
+     * @endcode
+     * </example>
+     *
+     * @see Resolution::Policy
+     */
+    virtual void setBaseResolution(int width, int height, Resolution::Policy policy) = 0;
+
+    /**
+     * Retrieves the resolution information.
+     * The resolution data structure stores information such as
+     * the current active viewport, the window width and height,
+     * the base resolution and the desktop resolution.
+     *
+     * @return The resolution information.
+     * @see ASGE::Resolution
+     */
+    [[nodiscard]] virtual const ASGE::Resolution& resolution() const = 0;
+
+    /**
+     * Sets the resolution policy.
+     * Defines how scaling should take place. There are a number
+     * of policies that control how mapping of the game's resolution
+     * to the window should take place.
+     *
+     * @param [in] policy. The policy to apply.
+     * @note Changing the policy will reset the current viewport.
+     * @see ASGE::Resolution::Policy
+     */
+    virtual void setResolutionPolicy(ASGE::Resolution::Policy) = 0;
+
+    /**
+     * Gets any active render target.
+     * Retrieves the active buffer object. This will be nullptr if
+     * there is currently no render target active.
+     *
+     * @return The active render target.
+     */
+    [[nodiscard]] ASGE::RenderTarget* renderTarget() { return active_buffer; }
+
+    /**
+     * Gets any active render target.
+     * Retrieves the active buffer object. This will be nullptr if
+     * there is currently no render target active.
+     *
+     * @return The active render target.
+     */
+    [[nodiscard]] const ASGE::RenderTarget* renderTarget() const { return active_buffer; }
+
+    /**
+     * Gets the MSAA level.
+     * When the game is setup the MSAA level is set on the
+     * window. This can't be adjusted during runtime, however,
+     * its value can be retrieved and used to create additional
+     * MSAA buffers.
+     *
+     * @return The MSAA level to use.
+     */
+    [[nodiscard]] int msaa() const;
+
+    /**
+     * Gets the default MagFilter.
+     * All textures when sampled beyond their resolution need to
+     * be magnified. This is the default value the game will use
+     * when no filter has been individually set on a texture.
+     *
+     * @return The default magnification filter.
+     * @see ASGE::Texture2D::MagFilter
+     */
+    [[nodiscard]] ASGE::Texture2D::MagFilter magFilter() const;
+
 	private:
-		GameSettings::WindowMode window_mode = GameSettings::WindowMode::WINDOWED; /**< The window mode being used. */
-		Colour cls = COLOURS::STEELBLUE; /**< The clear colour. Used to blank the window every redraw. */
-		Colour default_text_colour = COLOURS::YELLOWGREEN; /**< The default text colour. Used when no colour is specified. */
+    GameSettings::WindowMode window_mode{ GameSettings::WindowMode::WINDOWED }; /**< The window mode being used. */
+    Colour cls{ COLOURS::STEELBLUE }; /**< The clear colour. Used to blank the window every redraw. */
+    Colour default_text_colour{ COLOURS::YELLOWGREEN }; /**< The default text colour. Used when no colour is specified. */
+    ASGE::Texture2D::MagFilter mag_filter{ ASGE::Texture2D::MagFilter::LINEAR }; /**< Textures will use this filter by default. */
+    int msaa_level{ 16 };  /**< The MSAA level used. Controls the number of samples per texel taken.*/
+    int aniso_level{ 16 }; /**< Improves filtering at oblique angles. Not useful for 2D. */
 
    protected:
+    void msaa(int msaa_level);
+    void magFilter(ASGE::Texture2D::MagFilter mag);
     [[nodiscard]] GameSettings::WindowMode& windowMode() { return window_mode; }
     [[nodiscard]] const GameSettings::WindowMode& windowMode() const { return window_mode; }
     [[nodiscard]] Colour& clearColour() { return cls; }
     [[nodiscard]] const Colour& clearColour() const { return cls; }
     [[nodiscard]] Colour& defTextColour() { return default_text_colour; }
     [[nodiscard]] const Colour& defTextColour() const { return default_text_colour; }
+
+    ASGE::RenderTarget* active_buffer{ nullptr }; /**< The attached FBO. Used when rendering offscreen to textures. */
 	};
 }  // namespace ASGE

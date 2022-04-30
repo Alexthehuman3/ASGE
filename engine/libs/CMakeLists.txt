@@ -15,6 +15,7 @@ else()
     target_compile_definitions(glfw PRIVATE BUILD_SHARED_LIBS=FALSE)
 endif()
 
+add_dependencies(glfw update_mappings)
 target_compile_options(glfw PRIVATE $<$<BOOL:${MSVC}>:/w>)
 list(APPEND LINK_LIBS glfw ${GLFW_LIBRARIES})
 
@@ -24,7 +25,14 @@ list(APPEND LINK_LIBS glad)
 
 # Freetype
 add_subdirectory(freetype2)
-list(APPEND LINK_LIBS freetype)
+add_library(Freetype::Freetype ALIAS freetype)
+include(msdfgen/msdfgen.cmake)
+if(MONOLITHIC_BUILD AND MSVC)
+    set_property(TARGET msdfgen-core PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+    set_property(TARGET msdfgen-ext  PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+endif()
+list(APPEND LINK_LIBS "freetype" "msdfgen::msdfgen-core" "msdfgen::msdfgen-ext")
+
 
 # PhysFS and PhysFS++
 if(PHYSFS_SHARED_LIB)

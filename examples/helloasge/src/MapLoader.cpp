@@ -106,7 +106,7 @@ void MapLoader::render(ASGE::Renderer* renderer)
   {
     for (auto& sprite : layer)
     {
-      renderer->renderSprite(*sprite);
+      renderer->render(*sprite);
     }
   }
 }
