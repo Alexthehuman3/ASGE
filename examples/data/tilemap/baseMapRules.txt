@@ -1,2 +1,1 @@
 rule1.tmx
-D:\UWE\CCTP\ASGE-DynamicTileLoader\examples\data\tilemap\collisionRules.txt

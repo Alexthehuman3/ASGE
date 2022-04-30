@@ -261,7 +261,7 @@ class ASGENetGame : public ASGE::OGLGame
   {
     if (robot != nullptr)
     {
-      robot->xPos(level.getTileByLayerID(0).x - robot->width()/7);
+      robot->xPos(level.getTileByLayerID(0).x );
       robot->yPos(level.getTileByLayerID(0).y - robot->height()/1.5);
       interact_text->setPosition({lh_camera.position().x+100,lh_camera.position().y+100});
     }
