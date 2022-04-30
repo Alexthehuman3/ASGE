@@ -9,10 +9,7 @@ bool MapLoader::loadSharedMap(const std::string& path)
   map = std::make_shared<tmx::Map>();
   return map->load(path);
 }
-bool MapLoader::loadRawMap(const std::string& path)
-{
-  return raw_map.load(path);
-}
+
 std::shared_ptr<tmx::TileLayer> MapLoader::getLayer()
 {
   return tileLayer;
@@ -32,12 +29,11 @@ void MapLoader::init(ASGE::Renderer* renderer)
         for (unsigned int col = 0; col < layer->getSize().x; ++col)
         {
           auto tile_info = tileLayer->getTiles()[row*tileLayer->getSize().x + col];
-          if (layers == 0 || layers == 2 || layers == 3)
+          if (layers == 0 || layers == 2 || layers == 3 || layers == 4)
           {
             auto tile = map->getTilesets()[0].getTile(tile_info.ID);
             if (tile != nullptr)
             {
-
               auto& sprite = Level1Tiles[layers].emplace_back(renderer->createUniqueSprite());
               if (sprite->loadTexture(tile->imagePath))
               {
@@ -67,7 +63,6 @@ void MapLoader::init(ASGE::Renderer* renderer)
             auto tile = map->getTilesets()[1].getTile(tile_info.ID);
             if (tile != nullptr)
             {
-
               auto& sprite = Level1Tiles[layers].emplace_back(renderer->createUniqueSprite());
               if (sprite->loadTexture(tile->imagePath))
               {
@@ -114,28 +109,49 @@ void MapLoader::render(ASGE::Renderer* renderer)
       renderer->renderSprite(*sprite);
     }
   }
-
 }
-bool MapLoader::AABBCollision(ASGE::SpriteBounds bound1, ASGE::Point2D player)
+bool MapLoader::AABBCollision(ASGE::SpriteBounds bound1)
 {
   bool colliding_something = false;
   for (auto& sprite : Level1Tiles[1])
   {
     auto bound2 = sprite->getWorldBounds();
-    colliding_something = (bound1.v3.y > bound2.v1.y && bound1.v1.y < bound2.v3.y &&
-                           bound1.v1.x < bound2.v2.x && bound1.v2.x > bound2.v1.x);
-  }
-  if (colliding_something)
-  {
-    return true;
+    ASGE::Point2D b2_mid = bound2.v1.midpoint(bound2.v4);
+    if (bound1.v1.midpoint(bound1.v4).distance(b2_mid) <= COLLISION_DIST)
+    {
+      colliding_something =
+        (
+          bound1.v1.x < bound2.v2.x &&
+          bound1.v2.x > bound2.v1.x &&
+          bound1.v1.y < bound2.v3.y &&
+          bound1.v3.y > bound2.v1.y);
+    }
+
+    if (colliding_something)
+    {
+      return true;
+    }
   }
   for (auto& sprite : Level1Tiles[2])
   {
     auto bound2 = sprite->getWorldBounds();
-    colliding_something = (bound1.v3.y > bound2.v1.y && bound1.v1.y < bound2.v3.y &&
-                           bound1.v1.x < bound2.v2.x && bound1.v2.x > bound2.v1.x);
+    ASGE::Point2D b2_mid = bound2.v1.midpoint(bound2.v4);
+    if (bound1.v1.midpoint(bound1.v4).distance(b2_mid) <= COLLISION_DIST)
+    {
+      colliding_something =
+        (
+          bound1.v1.x < bound2.v2.x &&
+          bound1.v2.x > bound2.v1.x &&
+          bound1.v1.y < bound2.v3.y &&
+          bound1.v3.y > bound2.v1.y);
+    }
+
+    if (colliding_something)
+    {
+      return true;
+    }
   }
-  return colliding_something;
+  return false;
 }
 std::vector<std::shared_ptr<tmx::TileLayer>> MapLoader::getTileLayerGroup()
 {
@@ -143,5 +159,64 @@ std::vector<std::shared_ptr<tmx::TileLayer>> MapLoader::getTileLayerGroup()
 }
 ASGE::Point2D MapLoader::getTileByLayerID(unsigned int id)
 {
-  return {Level1Tiles[id][4]->xPos(), Level1Tiles[id][4]->yPos()};
+  return {Level1Tiles[3][id]->xPos(), Level1Tiles[3][id]->yPos()};
+}
+void MapLoader::resetAll()
+{
+  map.reset();
+  map = nullptr;
+  tileLayer.reset();
+  tileLayer = nullptr;
+  tileLayerGroup.clear();
+  tiles.clear();
+  Level1Tiles.clear();
+}
+bool MapLoader::interact(ASGE::SpriteBounds bound1)
+{
+  bool colliding_something = false;
+  bound1.v1 += {-10,-10};
+  bound1.v2 += {10,-10};
+  bound1.v3 += {-10,10};
+  bound1.v4 += {10,10};
+
+  for (auto& sprite : Level1Tiles[1])
+  {
+    auto bound2          = sprite->getWorldBounds();
+    ASGE::Point2D b2_mid = bound2.v1.midpoint(bound2.v4);
+    if (bound1.v1.midpoint(bound1.v4).distance(b2_mid) <= COLLISION_DIST)
+    {
+      colliding_something =
+        (bound1.v1.x < bound2.v2.x && bound1.v2.x > bound2.v1.x && bound1.v1.y < bound2.v3.y &&
+         bound1.v3.y > bound2.v1.y);
+    }
+    if (colliding_something)
+    {
+      Level1Tiles[1].erase(std::remove(Level1Tiles[1].begin(), Level1Tiles[1].end(), sprite),Level1Tiles[1].end());
+      return true;
+    }
+  }
+  return colliding_something;
+}
+bool MapLoader::isTouchingGoal(ASGE::SpriteBounds bound1)
+{
+  bool colliding = false;
+  for (auto& sprite: Level1Tiles[4])
+  {
+    auto bound2 = sprite->getWorldBounds();
+    ASGE::Point2D b2_mid = bound2.v1.midpoint(bound2.v4);
+    if (bound1.v1.midpoint(bound1.v4).distance(b2_mid) <= COLLISION_DIST)
+    {
+      colliding =
+        (
+          bound1.v1.x < bound2.v2.x &&
+          bound1.v2.x > bound2.v1.x &&
+          bound1.v1.y < bound2.v3.y &&
+          bound1.v3.y > bound2.v1.y);
+    }
+  }
+  if (colliding)
+  {
+    return true;
+  }
+  return false;
 }

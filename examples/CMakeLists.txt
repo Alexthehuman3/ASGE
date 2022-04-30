@@ -1,6 +1,8 @@
 add_executable(asgegame helloasge/ASGEGame.cpp
                helloasge/src/MapLoader.cpp
-               helloasge/headers/MapLoader.hpp)
+               helloasge/headers/MapLoader.hpp
+               helloasge/CustomIncludes/FileWatch.hpp
+        )
 target_link_libraries(asgegame PRIVATE asge tmxlite)
 
 add_custom_command(
