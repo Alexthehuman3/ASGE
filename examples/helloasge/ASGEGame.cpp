@@ -75,7 +75,7 @@ class ASGENetGame : public ASGE::OGLGame
       if (key == ASGE::KEYS::KEY_ESCAPE)
       {
         gs = GameState::MENU;
-        lh_camera.lookAt({1024/2,768/2});
+        lh_camera.lookAt({1600/2, 900/2});
       }
       keys[key] = false;
     }
@@ -143,6 +143,7 @@ class ASGENetGame : public ASGE::OGLGame
         if (level.isTouchingGoal(robot->getWorldBounds()))
         {
           gs = GameState::MENU;
+          lh_camera.lookAt({1600/2, 900/2});
         }
 
         lh_camera.lookAt(
@@ -177,18 +178,17 @@ class ASGENetGame : public ASGE::OGLGame
     switch(gs)
     {
       case MENU:
-        renderer->setViewport({0, 0, 1024, 768});
+        renderer->setViewport({1600/8, 900/8, 1600, 900});
         renderer->setProjectionMatrix(lh_camera.getView());
         //Insert stuff to render here
         for (auto text : menu_text)
         {
           renderer->render(*text);
         }
-        renderer->setProjectionMatrix(0, 1024, 0, 768);
         break;
       case GAME:
         //Camera 1
-        renderer->setViewport({0, 0, 1024, 768});
+        renderer->setViewport({1600/8, 900/8, 1600, 900});
         renderer->setProjectionMatrix(lh_camera.getView());
         renderer->render(*robot);
         renderer->render(*zombie);
@@ -215,7 +215,6 @@ class ASGENetGame : public ASGE::OGLGame
         camera2.setPositionX(1024 * 0.75F - (camera2.getWidth() * 0.5F));
         camera2.setPositionY(30);
         */
-        renderer->setProjectionMatrix(0, 1024, 0, 768);
         /*
         renderer->render(camera1);
         renderer->render(camera2);
@@ -248,12 +247,13 @@ class ASGENetGame : public ASGE::OGLGame
     bg->setGlobalZOrder(-1);
     renderer->setClearColour(ASGE::COLOURS::BLACK);
     lh_camera.resize(settings.window_width, settings.window_height);
-    rh_camera.resize(1024 / 2.0F, 768);
-    lh_camera.lookAt({ 1024*0.5, 768*0.5 });
-    rh_camera.lookAt({ 1024 * 0.50F, 768 / 2.0F });
+    rh_camera.resize(1600, 900);
+    lh_camera.lookAt({ 1600/2, 900/2});
+    rh_camera.lookAt({ 1600, 900});
     initMenu(settings);
 
     interact_text = std::make_shared<ASGE::Text>(renderer->getDefaultFont(),"You broke a barrel");
+    interact_text->setScale(0.5F);
     interact_text->setZOrder(2);
   }
 
@@ -317,8 +317,8 @@ int main(int /*argc*/, char* /*argv*/[])
 {
   ASGE::GameSettings game_settings;
   game_settings.game_title  = "ASGEGame";
-  game_settings.window_width  = 1024;
-  game_settings.window_height = 768;
+  game_settings.window_width  = 1600;
+  game_settings.window_height = 900;
   game_settings.mode          = ASGE::GameSettings::WindowMode::WINDOWED;
   game_settings.fixed_ts      = 60;
   game_settings.fps_limit     = 60;
