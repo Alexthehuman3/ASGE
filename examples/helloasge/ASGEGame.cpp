@@ -270,7 +270,7 @@ class ASGENetGame : public ASGE::OGLGame
   void resetMap()
   {
     level.resetAll();
-    if (!level.loadSharedMap("data/tilemap/testTile.tmx"))
+    if (!level.loadSharedMap(tmx_path))
     {
       Logging::ERRORS("Failed to Load Map");
       return;
@@ -295,6 +295,7 @@ class ASGENetGame : public ASGE::OGLGame
  private:
   int key_callback_id = -1; /**< Key Input Callback ID. */
   GameState gs = GameState::MENU;
+  std::string tmx_path = "data/tilemap/testTile.tmx";
   std::shared_ptr<ASGE::Sprite> robot = nullptr;
   std::unique_ptr<ASGE::Sprite> zombie = nullptr;
   std::unique_ptr<ASGE::Sprite> bg = nullptr;

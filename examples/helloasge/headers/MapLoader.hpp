@@ -30,7 +30,6 @@ class MapLoader
   void render(ASGE::Renderer* renderer);
   std::shared_ptr<tmx::Map> getMap();
   std::shared_ptr<tmx::TileLayer> getLayer();
-  std::vector<std::shared_ptr<tmx::TileLayer>> getTileLayerGroup();
   ASGE::Point2D getTileByLayerID(unsigned int id);
   bool AABBCollision(ASGE::SpriteBounds bound1);
   bool interact(ASGE::SpriteBounds bound1);

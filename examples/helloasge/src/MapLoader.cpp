@@ -153,10 +153,6 @@ bool MapLoader::AABBCollision(ASGE::SpriteBounds bound1)
   }
   return false;
 }
-std::vector<std::shared_ptr<tmx::TileLayer>> MapLoader::getTileLayerGroup()
-{
-  return tileLayerGroup;
-}
 ASGE::Point2D MapLoader::getTileByLayerID(unsigned int id)
 {
   return {Level1Tiles[3][id]->xPos(), Level1Tiles[3][id]->yPos()};
